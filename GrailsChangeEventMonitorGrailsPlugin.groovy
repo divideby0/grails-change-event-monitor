@@ -1,3 +1,6 @@
+import org.codehaus.groovy.grails.plugins.PluginManagerHolder
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+
 class GrailsChangeEventMonitorGrailsPlugin {
     // the plugin version
     def version = "0.1"
@@ -34,14 +37,24 @@ Brief description of the plugin.
     }
 
     def doWithApplicationContext = { applicationContext ->
+		def disableScanning = ConfigurationHolder.config.changeEventMonitor?.disableScanning
+	
+		if(disableScanning) {
+			manager.metaClass.startPluginChangeScanner = { ->
+				log.info "Ignoring request to start plugin change scanner as it is disabled."
+			}
+		}
+		
         // TODO Implement post initialization spring config (optional)
     }
 
     def onChange = { event ->
+		log.info "event: ${event.manager}"
         log.info "resource changed: ${event.source}"
     }
 
     def onConfigChange = { event ->
+		log.info "event: ${event}"
         log.info "config changed: ${event.source}"
     }
 }
